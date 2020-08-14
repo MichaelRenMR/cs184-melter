@@ -18,7 +18,7 @@ public class Melter : MonoBehaviour
     public float VIBRATION = 50;
 
     // Seconds to wait before the simulation starts
-    public float startTime = 5f;
+    public float startTime = 3f;
 
     // Timestep between calculations for this simulation. Smaller timestep means more accuracy at higher performance cost.
     public float timeStep = 0.05f;
