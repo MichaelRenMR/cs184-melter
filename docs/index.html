@@ -1,0 +1,436 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <style>
+    body {
+      font-weight: 300;
+      font-family: 'Open Sans', sans-serif;
+      color: #121212;
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Source Sans Pro', sans-serif;
+    }
+  </style>
+  <title>CS 184 Cloth Simulator</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content=" width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/github-markdown-css/2.2.1/github-markdown.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="layout.css">
+</head>
+
+
+<body>
+<nav class="site-header py-md-2 sticky-top">
+  <div class="container-fluid-1 d-flex flex-column flex-md-row justify-content-between">
+    <h4 class="py-1 d-none d-md-inline-block topbar">CS184: Computer Graphics and Imaging</h4>
+    <h4 class="py-1 d-none d-md-inline-block topbar">Summer 2020</h4>
+  </div>
+</nav>
+<div class="container-fluid">
+<div class ="row flex-xl">
+  <nav class="d-none d-xl-block col-sm-0 py-lg-5 position-fixed" style="padding-left:0">
+  <div class="sidebar-sticky">
+    <ul class="nav flex-column">
+      <li class="nav-item"><a class="nav-link" href="#overview">Overview</a></li>
+      <li class="nav-item"><a class="nav-link" href="#part1">Part 1</a></li>
+      <li class="nav-item"><a class = "nav-link" href="#part2">Part 2</a></li>
+      <li class="nav-item"><a class = "nav-link" href="#part3">Part 3</a></li>
+      <li class="nav-item"><a class = "nav-link" href="#part4">Part 4</a></li>
+      <li class="nav-item"><a class = "nav-link" href="#part5">Part 5</a></li>
+      <li class="nav-item"><a class = "nav-link" href="#conclusion">Conclusion</a></li>
+    </ul>
+  </div>
+  </nav>
+<main class="col-xl-10 ml-sm-auto pl-md-3" role="main">
+  <br style="line-height:3px">
+  <div class="markdown-body">
+    <h1 align="middle">Project 4: Cloth Simulator</h1>
+    <h2 align="middle">Michael Ren, CS184-abd</h2>
+    <a class="anchor" id="overview"></a>
+      <h2>Overview</h2>
+      <p>
+        In this project, I implement a basic cloth simulator. The underlying model is a grid of pointmasses spanned by springs
+        of various types and strengths. With each task, I make additions to the basic model in order to make it more realistic,
+        such as implementing collisions and adding textures.
+      </p>
+
+    <a class="anchor" id="part1"></a>
+        <h2>Part 1: Masses and Springs</h2>
+            <p>
+              To start off, we begin creating the cloth by defining the
+              <a href="https://cs184.eecs.berkeley.edu/sp20/lecture/19-18/physical-simulation">underlying structure</a> of the material.
+              Since cloth is an elastic material, we first set up a grid of pointmasses, then connect the pointmasses by springs.
+              This allows us to simulate the overall motion of the cloth by calculating the local external and internal forces affecting each
+              pointmass, then modifying its position and velocity by the laws of physics (and some approximations). This is done in
+              future parts. For now, the finished cloth grid can be seen by the below pictures.
+            </p>
+
+            <div align="middle">
+              <table>
+                <tr>
+                  <td>
+                    <img src="images/part1/mesh1.png" align="middle" width="90%" />
+                    <figcaption align="middle">Mesh with all three spring types shown.</figcaption>
+                  </td>
+                  <td>
+                    <img src="images/part1/mesh2.png" align="middle" width="90%"/>
+                    <figcaption align="middle">Another angle of the mesh with all three spring types shown.</figcaption>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <img src="images/part1/shearing.png" align="middle" width="90%" />
+                    <figcaption align="middle">The mesh shown with shearing springs only.</figcaption>
+                  </td>
+                  <td>
+                    <img src="images/part1/noshearing.png" align="middle" width="90%"/>
+                    <figcaption align="middle">The mesh shown with no shearing springs, but structural and bending springs present.</figcaption>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+        <a class="anchor" id="part2"></a>
+        <h2>Part 2: Simulation via Numerical Integration</h2>
+          <p>
+            With the springs and pointmasses ready, we can begin simulating the movement of the cloth as external forces such as gravity
+            act on it. To do this, there are three discrete steps:
+          </p>
+            <ol>
+              <li>Calculate all the external forces acting on the cloth and add the force to each individual pointmass.</li>
+              <li>Use <a href="https://cs184.eecs.berkeley.edu/sp20/lecture/19-36/physical-simulation">Verlet Integration</a> to numerically
+              integrate the acceleration and velocity and update the positions for every pointmass in the cloth.</li>
+              <li>Constrain position updates to uphold physical realism as defined by this
+                <a href="https://www.cs.rpi.edu/~cutler/classes/advancedgraphics/S14/papers/provot_cloth_simulation_96.pdf">paper</a>.
+              </li>
+            </ol>
+          <p>
+            With these physical principles implemented, we can now realistically simulate the cloth falling in real time. We can also
+            explore and validate our physical model by observing what happens when we vary properties of the underlying structure, such
+            as spring constant and damping force.
+          </p>
+
+          <div align="middle">
+            <img src="images/part2/default.png" align="middle" width="50%" />
+            <figcaption align="middle">Default. Note the settings in the left and right windows of the GUI.</figcaption>
+          </div>
+          <div align="middle">
+            <table>
+              <tr>
+                <td>
+                  <img src="images/part2/low_ks.png" align="middle" width="90%" />
+                  <figcaption align="middle">Default settings, lower spring constant.</figcaption>
+                </td>
+                <td>
+                  <img src="images/part2/high_ks.png" align="middle" width="90%" />
+                  <figcaption align="middle">Default settings, higher spring constant.</figcaption>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <img src="images/part2/low_damping.png" align="middle" width="90%" />
+                  <figcaption align="middle">Default settings with lower damping ratio.</figcaption>
+                </td>
+                <td>
+                  <img src="images/part2/high_damping.png" align="middle" width="90%" />
+                  <figcaption align="middle">Default settings with higher damping ratio.</figcaption>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <img src="images/part2/low_density.png" align="middle" width="90%" />
+                  <figcaption align="middle">Default settings with lower density.</figcaption>
+                </td>
+                <td>
+                  <img src="images/part2/high_density.png" align="middle" width="90%" />
+                  <figcaption align="middle">Default settings with higher density.</figcaption>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <p>
+            In the first set of images, the spring constant is varied.
+            The higher the spring constant, the stiffer the springs. As a result, the cloth as a whole is stiffer. This is
+            most easily seen in how the top edge of the cloth dips less in the higher spring constant case than the lower spring constant case.
+          </p>
+          <p>
+            In the second set of images, the damping ratio is varied. The damping ratio dictates the spring's energy conservation
+            by modifying the friction coefficient. In the first image, since there is less friction, the cloth actually swings past
+            its lowest point and exhibits some pendulum motion as it converges to its resting state much more slowly. By contrast,
+            with the higher damping ratio the cloth quickly falls to rest from it's initial horizontal state.
+          </p>
+          <p>
+            In the last set of images, the density of the pointmasses is varied. With lower density, the springs have less force
+            pushing them away from their resting states, so the cloth doesn't droop as much. However, with high density, the heavy
+            weight of the pointmasses weighs down the springs and causes much more expansion.
+          </p>
+          <p>
+            Finally below are some pictures of the cloth with its 4 corners pinned in its final resting state. Pretty!
+          </p>
+          <div align="middle">
+            <table>
+              <tr>
+                <td>
+                  <img src="images/part2/pinned4_normal.png" align="middle" width="90%" />
+                  <figcaption align="middle">Four corners pinned with normal shading.</figcaption>
+                </td>
+                <td>
+                  <img src="images/part2/pinned4_diffuse.png" align="middle" width="90%" />
+                  <figcaption align="middle">Four corners pinned with diffuse shading for better visibility.</figcaption>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <br/> <br/>
+
+
+      <a class="anchor" id="part3"></a>
+      <h2>Part 3: Handling Collisions with Other Objects</h2>
+      <p>
+        Now we want to make the cloth mesh able to interact with its environment. To do this, we need to implement
+        collision algorithms to make sure the cloth doesn't clip into other objects and interacts with them as expected.
+      </p>
+      <p>
+        The two algorithms implemented are sphere collision and plane collision. Upon collision with either object, we
+        "pop" the cloth back up to the side of the object that the cloth was originally on by applying a correction to its position
+        after it has been calculated via the Verlet integration implemented in Part 2. The below pictures display the cloth
+        resting on each object rather than clipping through it.
+      </p>
+      <div align="middle">
+        <img src="images/part3/normal_k5000.png" align="middle" width="50%" />
+        <figcaption align="middle">Cloth resting on sphere with spring constant <code>k=5000</code>.</figcaption>
+      </div>
+      <div align="middle">
+        <table>
+          <tr>
+            <td>
+              <img src="images/part3/phong_k500.png" align="middle" width="90%" />
+              <figcaption align="middle">Cloth resting on sphere with spring constant <code>k=500</code>. Phong shading.</figcaption>
+            </td>
+            <td>
+              <img src="images/part3/texture_k50000.png" align="middle" width="90%" />
+              <figcaption align="middle">Cloth resting on sphere with spring constant <code>k=50000</code>. Texture shading.</figcaption>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <p>
+        Observe the differences in the cloth stretch due to varying the spring constant. Just like in Part 2, lower spring constant results
+        in more stretch, while higher spring constant results in less stretch.
+      </p>
+      <p>
+        Plane collision can also be seen below:
+      </p>
+      <div align="middle">
+        <table>
+          <tr>
+            <td>
+              <img src="images/part3/mirror_plane.png" align="middle" width="90%" />
+              <figcaption align="middle">Cloth resting on plane with mirror shading.</figcaption>
+            </td>
+            <td>
+              <img src="images/part3/diffuse_plane.png" align="middle" width="90%" />
+              <figcaption align="middle">Cloth resting on plane with diffuse shading.</figcaption>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <a class="anchor" id="part4"></a>
+      <h2>Part 4: Handling Self Collisions</h2>
+      <p>
+        We've handled collisions with other objects but we also can't forget handling collisions between the cloth and itself!
+        This is actually a bit more complicated than collisions with other objects, because we can't just compute collisions individually
+        for every pointmass in the cloth; instead we have to compute collisions between every <i>pair</i> of pointmasses in the cloth, greatly
+        increasing the time complexity. One such solution, which is implemented here, is to use a hashtable instead, where each key in the table
+        represents a particular volumetric region in the cloth containing all the pointmasses in that region. In this manner, we don't need
+        to test against every pointmass, but rather only the nearby pointmasses. Thus, for every time step, a spatial map of the cloth is built,
+        and then collisions are calculated using the map. If a collision occurs between two point masses, then they are moved a set distance apart
+        from each other. The below screenshots show a vertical cloth falling onto a plane while exhibiting no clipping. The first column is
+        the default reference, while the second column exhibits low density and the third column exhibits low spring constant.
+      </p>
+    <div align="middle">
+      <table>
+        <tr>
+          <td>
+            <img src="images/part4/collision1.png" align="middle" width="100%" />
+            <figcaption align="middle">Falling cloth in initial stage of collisions.</figcaption>
+          </td>
+          <td>
+            <img src="images/part4/low_density1.png" align="middle" width="100%" />
+            <figcaption align="middle">Stage 1 with lower density.</figcaption>
+          </td>
+          <td>
+            <img src="images/part4/low_k1.png" align="middle" width="100%" />
+            <figcaption align="middle">Stage 1 with lower spring constant.</figcaption>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <img src="images/part4/collision2.png" align="middle" width="100%" />
+            <figcaption align="middle">Falling cloth in intermediate stage of collisions.</figcaption>
+          </td>
+          <td>
+            <img src="images/part4/low_density2.png" align="middle" width="100%" />
+            <figcaption align="middle">Stage 2 with lower density.</figcaption>
+          </td>
+          <td>
+            <img src="images/part4/low_k2.png" align="middle" width="100%" />
+            <figcaption align="middle">Stage 2 with lower spring constant.</figcaption>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <img src="images/part4/collision3.png" align="middle" width="100%" />
+            <figcaption align="middle">The cloth in its resting state on the plane.</figcaption>
+          </td>
+          <td>
+            <img src="images/part4/low_density3.png" align="middle" width="100%" />
+            <figcaption align="middle">Stage 3 with lower density.</figcaption>
+          </td>
+          <td>
+            <img src="images/part4/low_k3.png" align="middle" width="100%" />
+            <figcaption align="middle">Stage 3 with lower spring constant.</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <p>
+      Just like in Part 2, lowering the density causes the springs to be relatively stronger and so the mesh is much
+      less inflexible. It has less intermediate folds and is overall flatter. Meanwhile, lowering the spring constant
+      has the opposite effect and the cloth exhibits more folding as the springs are weaker and the cloth has less structural
+      support.
+    </p>
+
+    <a class="anchor" id="part5"></a>
+    <h2>Part 5: Handling Self Collisions</h2>
+    <p>
+      In Part 5 I implemented shaders using OpenGL shaders and the GLSL language. The shaders implemented were
+      Diffuse, Blinn-Phong, Texture Mapping, Bump & Displacement Map, and Mirror shaders. The implementations all followed
+      from the ones discussed in class.
+    </p>
+    <p>
+      The two basic OpenGL shader types used are vertex shaders and fragment shaders. Vertex shaders are used to take in a vertex,
+      then transform its properties accordingly so that it can be passed into the fragment shader, which assigns the final color
+      of the vertex. Thus, the two work together to produce a texture across the entire cloth.
+    <h4>Blinn-Phong Shading</h4>
+    <p>
+      The first major model implemented is the Blinn-Phong model. Ambient, diffuse, and specular lights are individually computed per vertex,
+      then the three are superimposed together to prdouce the final output. In this way, Blinn-Phong produces smooth and realistic shading.
+      Ambient light is assumed to be naturally coming from the environment, and specular highlights are computed taking into account the
+      location of the light source in the scene. Displayed below are the three components of Blinn-Phong, as well as the final result
+      gained from adding all three factors together.
+    </p>
+    <div align="middle">
+      <table>
+        <tr>
+          <td>
+            <img src="images/part5/phong_ambient.png" align="middle" width="100%" />
+            <figcaption align="middle">Ambient environment lighting.</figcaption>
+          </td>
+          <td>
+            <img src="images/part5/phong_diffuse.png" align="middle" width="100%" />
+            <figcaption align="middle">Diffuse lighting.</figcaption>
+          </td>
+          <td>
+            <img src="images/part5/phong_specular.png" align="middle" width="100%" />
+            <figcaption align="middle">Specular highlights.</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div align="middle">
+      <img src="images/part5/phong.png" align="middle" width="50%" />
+      <figcaption align="middle">The end result.</figcaption>
+    </div>
+    <p>
+      The texture mapping shader was also implemented by sampling the texture proportionally, much like Barycentric coordinates.
+      By extension, the mirror mapping shader is actually very similar to texture mapping, but with a precomputed reflection in
+      order to sample the texture at its reflected position instead.
+    </p>
+    <div align="middle">
+      <table>
+        <tr>
+          <td>
+            <img src="images/part5/custom_texture.png" align="middle" width="90%" />
+            <figcaption align="middle">Custom texture with texture mapping shader.</figcaption>
+          </td>
+          <td>
+            <img src="images/part5/custom_texture_fallen.png" align="middle" width="90%" />
+            <figcaption align="middle">The texture shader with the cloth draped onto the sphere.</figcaption>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <img src="images/part5/mirror.png" align="middle" width="90%" />
+            <figcaption align="middle">Mirror shading.</figcaption>
+          </td>
+          <td>
+            <img src="images/part5/mirror2.png" align="middle" width="90%" />
+            <figcaption align="middle">Mirror shading with the cloth draped.</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <p>
+      In bump mapping and displacement mapping, the normals of the object itself is modified before being passed into
+      the fragment shader in order to give the illusion of bumpy textures. Elevation change is computed by observing
+      the frequency change in the corresponding portion of the texture; higher frequency change means higher elevation change.
+      Finally, displacement mapping comes only with the added addition of modifying the positions of the vertices as well
+      to create a rougher looking geometry. After recalculating the vertices and normals, Blinn-Phong shading is applied as before.
+      The images below illustrate each of these. The custom texture used was a 5000x3000 image of wood planks.
+    </p>
+    <div align="middle">
+      <table>
+        <tr>
+          <td>
+            <img src="images/part5/bump_default.png" align="middle" width="90%" />
+            <figcaption align="middle">Bump shader under default settings.</figcaption>
+          </td>
+          <td>
+            <img src="images/part5/bump_16.png" align="middle" width="90%" />
+            <figcaption align="middle">Bump shader using a low resolution 16x16 sphere mesh.</figcaption>
+          </td>
+          <td>
+            <img src="images/part5/bump_128.png" align="middle" width="90%" />
+            <figcaption align="middle">Bump shader using a higher resolution 128x128 sphere mesh.</figcaption>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <img src="images/part5/displacement_default.png" align="middle" width="90%" />
+            <figcaption align="middle">Displacement shader under default settings.</figcaption>
+          </td>
+          <td>
+            <img src="images/part5/displacement_16.png" align="middle" width="90%" />
+            <figcaption align="middle">Displacement shader using a low resolution 16x16 sphere mesh.</figcaption>
+          </td>
+          <td>
+            <img src="images/part5/displacement_128.png" align="middle" width="90%" />
+            <figcaption align="middle">Displacement shader using a higher resolution 128x128 sphere mesh.</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <p>
+      Although it is difficult to see due to the high resolution and horizontally uniform texture that I ended up using,
+      varying the resolution of the sphere changes the number of individual texture cells that are mapped onto the sphere.
+      For some less uniform textures, this can have a significant effect on how the texture looks on the sphere and other objects.
+    </p>
+    <a class="anchor" id="conclusion"></a>
+    <h2>Conclusion</h2>
+    <p>
+      This concludes Cloth Simulator! We have only scratched the surface of physical simulation, but this was nonetheless an
+      interesting project. In the future, I'd like to try simulations such as liquid, smoke, and phase changes. Until next time!
+    </p>
+    <br/><br/>
+    </main>
+  </div>
+</div>
+
+
+</body>
+</html>
