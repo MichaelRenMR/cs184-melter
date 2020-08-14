@@ -14,11 +14,30 @@
   <title>CS 184 Cloth Simulator</title>
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <meta name="viewport" content=" width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/github-markdown-css/2.2.1/github-markdown.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Lora&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="layout.css">
+  <style>
+      body {
+          padding-bottom: 50px;
+      }
+      p, li, blockquote {
+          font-family: 'Lora', serif;
+          font-size: 20px;
+      }
+      blockquote {
+          font-style: italic;
+          color: #595959;
+      }
+      h1, h2, h3, h4, h5, h6 {
+          font-family: 'Open Sans', sans-serif;
+          font-weight: bold;
+      }
+  </style>
+
 </head>
 
 
@@ -29,324 +48,214 @@
     <h4 class="py-1 d-none d-md-inline-block topbar">Summer 2020</h4>
   </div>
 </nav>
-<div class="container-fluid">
+<div class="container">
 <div class ="row flex-xl">
-  <nav class="d-none d-xl-block col-sm-0 py-lg-5 position-fixed" style="padding-left:0">
+  <nav class="d-none d-xl-block col-lg-8 col-md-10 max-auto py-lg-5 position-fixed" style="padding-left:0">
   <div class="sidebar-sticky">
     <ul class="nav flex-column">
-      <li class="nav-item"><a class="nav-link" href="#overview">Overview</a></li>
-      <li class="nav-item"><a class="nav-link" href="#part1">Part 1</a></li>
-      <li class="nav-item"><a class = "nav-link" href="#part2">Part 2</a></li>
-      <li class="nav-item"><a class = "nav-link" href="#part3">Part 3</a></li>
-      <li class="nav-item"><a class = "nav-link" href="#part4">Part 4</a></li>
-      <li class="nav-item"><a class = "nav-link" href="#part5">Part 5</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Title</a></li>
+      <li class="nav-item"><a class="nav-link" href="#abstract">Abstract</a></li>
+      <li class="nav-item"><a class = "nav-link" href="#technical_approach">Technical Approach</a></li>
+      <li class="nav-item"><a class = "nav-link" href="#results">Results</a></li>
+      <li class="nav-item"><a class = "nav-link" href="#contributions">Contributions</a></li>
       <li class="nav-item"><a class = "nav-link" href="#conclusion">Conclusion</a></li>
+      <li class="nav-item"><a class = "nav-link" href="#references">References</a></li>
     </ul>
   </div>
   </nav>
 <main class="col-xl-10 ml-sm-auto pl-md-3" role="main">
   <br style="line-height:3px">
   <div class="markdown-body">
-    <h1 align="middle">Project 4: Cloth Simulator</h1>
-    <h2 align="middle">Michael Ren, CS184-abd</h2>
-    <a class="anchor" id="overview"></a>
-      <h2></h2>
-      <p>
-      </p>
+    <h1 align="middle">Final Project: Real Time Melting Simulation Using Springs</h1>
+    <h2 align="middle">Michael Ren & Mathew Han, CS184-su20</h2>
 
-    <a class="anchor" id="part1"></a>
-        <h2></h2>
+    <a class="anchor" id="abstract"></a>
+        <h2>Abstract</h2>
             <p>
+            The goal of this project was to create a real time melting simulation in Unity by using spring joints and point masses. The rationale behind our implementation relates to how intermolecular forces act between particles at an atomic level. The spring constant represents the strength of intermolecular forces between particles, and the lattice structure of our cube is similar to the metalic bonds within metals. We can simulate this at a macro level using spring joints and larger point masses. 
             </p>
 
-            <div align="middle">
-              <table>
-                <tr>
-                  <td>
-                    <img src="images/part1/mesh1.png" align="middle" width="90%" />
-                    <figcaption align="middle">Mesh with all three spring types shown.</figcaption>
-                  </td>
-                  <td>
-                    <img src="images/part1/mesh2.png" align="middle" width="90%"/>
-                    <figcaption align="middle">Another angle of the mesh with all three spring types shown.</figcaption>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <img src="images/part1/shearing.png" align="middle" width="90%" />
-                    <figcaption align="middle">The mesh shown with shearing springs only.</figcaption>
-                  </td>
-                  <td>
-                    <img src="images/part1/noshearing.png" align="middle" width="90%"/>
-                    <figcaption align="middle">The mesh shown with no shearing springs, but structural and bending springs present.</figcaption>
-                  </td>
-                </tr>
-              </table>
-            </div>
+        <a class="anchor" id="technical_approach"></a>
+        <h2>Technical Approach</h2>
+          <h3>Overall pipeline</h3>
 
-        <a class="anchor" id="part2"></a>
-        <h2></h2>
-          <p>
-          </p>
-          <p>
-          </p>
-
-          <div align="middle">
-            <img src="images/part2/default.png" align="middle" width="50%" />
-            <figcaption align="middle">Default. Note the settings in the left and right windows of the GUI.</figcaption>
-          </div>
           <div align="middle">
             <table>
               <tr>
                 <td>
-                  <img src="images/part2/low_ks.png" align="middle" width="90%" />
-                  <figcaption align="middle">Default settings, lower spring constant.</figcaption>
-                </td>
-                <td>
-                  <img src="images/part2/high_ks.png" align="middle" width="90%" />
-                  <figcaption align="middle">Default settings, higher spring constant.</figcaption>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <img src="images/part2/low_damping.png" align="middle" width="90%" />
-                  <figcaption align="middle">Default settings with lower damping ratio.</figcaption>
-                </td>
-                <td>
-                  <img src="images/part2/high_damping.png" align="middle" width="90%" />
-                  <figcaption align="middle">Default settings with higher damping ratio.</figcaption>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <img src="images/part2/low_density.png" align="middle" width="90%" />
-                  <figcaption align="middle">Default settings with lower density.</figcaption>
-                </td>
-                <td>
-                  <img src="images/part2/high_density.png" align="middle" width="90%" />
-                  <figcaption align="middle">Default settings with higher density.</figcaption>
+                  <img src="images/melter/pipeline.png" align="middle" width="90%" />
+                  <figcaption align="middle">Pseudocode of the overall melter pipeline.</figcaption>
                 </td>
               </tr>
             </table>
           </div>
+
+          <h3>Constructing the cube</h3>
           <p>
+          The cube was created by attaching a script to an empty <code>GameObject</code> that generated a 3D matrix of sphere masses. Each of these sphere masses were given their own <code>Rigidbody</code> and connected to its (up to 26) neighbors using a one-way spring joint. Unlike Project 4 (ClothSim), we wanted to simulate a metal rather than a weightless cloth, so we used a high spring constant to make the cube appear solid and a higher mass per particle.
           </p>
-          <p>
-          </p>
-          <p>
-          </p>
-          <p>
-          </p>
+
           <div align="middle">
             <table>
               <tr>
                 <td>
-                  <img src="images/part2/pinned4_normal.png" align="middle" width="90%" />
-                  <figcaption align="middle">Four corners pinned with normal shading.</figcaption>
-                </td>
-                <td>
-                  <img src="images/part2/pinned4_diffuse.png" align="middle" width="90%" />
-                  <figcaption align="middle">Four corners pinned with diffuse shading for better visibility.</figcaption>
+                  <img src="images/melter/birdseye.png" align="middle" width="90%" />
+                  <figcaption align="middle">Bird's eye view of the cube.</figcaption>
                 </td>
               </tr>
             </table>
           </div>
-          <br/> <br/>
+
+          <p>
+          One of the biggest issues that we came across while implementing the structure was that the masses were too far apart from each other initially. If we applied too much external force, the box would explode and particles would fly everywhere on the screen. We fixed this by increasing the mass of each particle so that it would take more force to move a spring, as well as decreasing the average distance between each particle. 
+          </p>
+
+          <div align="middle">
+            <table>
+              <tr>
+                <td>
+                  <img src="images/melter/info.png" align="middle" width="90%" />
+                </td>
+                <td>
+                  <img src="images/melter/objects.png" align="middle" width="90%" />
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <p>
+          Some other more trivial issues that arose with our implementation came with how we designed the cube. Initially, we were only going to use structural spring joints, but the cube would simply fall apart. We later added in planar and 3D shearing to address this problem. In addition, Unity has only one way spring joints by default, so we had to apply spring joints for each point mass in one direction, unlike ClothSim where it was done in pairs. 
+          </p>
+
+          <h3>Simulating heat propagation</h3>
+
+          <p>
+          </p>
+
+          <div align="middle">
+            <table>
+              <tr>
+                <td>
+                  <img src="images/melter/melting_3.gif" align="middle" width="90%" />
+                  <figcaption align="middle">Constant heat applied from the left.</figcaption>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <div align="middle">
+            <table>
+              <tr>
+                <td>
+                  <img src="images/melter/melting_4.gif" align="middle" width="90%" />
+                  <figcaption align="middle">Fixed hot and cold point on the left and right respectively.</figcaption>
+                </td>
+                <td>
+                  <img src="images/melter/3b1b.gif" align="middle" width="90%" />
+                  <figcaption align="middle">3Blue1Brown: 
+                    <a href="https://www.youtube.com/watch?v=r6sGWTCMz2k">But what is a Fourier series? From heat flow to circle drawings | DE4
+</a>
+</figcaption>
+                </td>
+              </tr>
+            </table>
+          </div>
 
 
-      <a class="anchor" id="part3"></a>
-      <h2></h2>
-      <p>
-      </p>
-      <p>
-      </p>
-      <div align="middle">
-        <img src="images/part3/normal_k5000.png" align="middle" width="50%" />
-        <figcaption align="middle">Cloth resting on sphere with spring constant <code>k=5000</code>.</figcaption>
-      </div>
-      <div align="middle">
-        <table>
-          <tr>
-            <td>
-              <img src="images/part3/phong_k500.png" align="middle" width="90%" />
-              <figcaption align="middle">Cloth resting on sphere with spring constant <code>k=500</code>. Phong shading.</figcaption>
-            </td>
-            <td>
-              <img src="images/part3/texture_k50000.png" align="middle" width="90%" />
-              <figcaption align="middle">Cloth resting on sphere with spring constant <code>k=50000</code>. Texture shading.</figcaption>
-            </td>
-          </tr>
-        </table>
-      </div>
-      <p>
-      </p>
-      <p>
-        Plane collision can also be seen below:
-      </p>
-      <div align="middle">
-        <table>
-          <tr>
-            <td>
-              <img src="images/part3/mirror_plane.png" align="middle" width="90%" />
-              <figcaption align="middle">Cloth resting on plane with mirror shading.</figcaption>
-            </td>
-            <td>
-              <img src="images/part3/diffuse_plane.png" align="middle" width="90%" />
-              <figcaption align="middle">Cloth resting on plane with diffuse shading.</figcaption>
-            </td>
-          </tr>
-        </table>
-      </div>
+          <p>
+          One of the largest problems we encountered was how we wanted to simulate the heat propagation itself. Initially, we tried energy based radiation using the Stefan-Boltzmann Law, but we ran into issues with conservation of energy. As the simulation continued running, the temperatures would increase exponentially until they became <code>NaN</code>. Since we didn't want to go through the hassle of keeping track of the energy from heat loss and the energy from heat transfer, we went with the heat equation approach.
+          </p>
 
-      <a class="anchor" id="part4"></a>
-      <h2></h2>
+          <h3>Applying melting</h3>
+          <p>
+          To implement the melting effect, we used an empirically derived curve from <a href="https://www.osti.gov/biblio/1241122">Thermal Degradation of Extension Springs</a>. Since the paper didn't provide an explicit formula for their regression, we approximated it using a cubic spline. The formula would be applied to springs constants of the outgoing spring joints of each particle mass, causing hotter particles to have weaker springs over time. The cube itself would become less structurally stable because of the shift in spring forces, causing the melting effect that we wanted to simulate.
+          </p>
+
+          <div align="middle">
+            <table>
+              <tr>
+                <td>
+                  <img src="images/melter/curve.png" align="middle" width="90%" />
+                  <figcaption align="middle">Werner, Brian T., Antoun, Bonnie R., and Sartor, George B. Thermal Degradation of Extension Springs.. United States: N. p., 2015. Web. 
+</figcaption>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <p>
+          However, the formula only mapped temperature directly to the spring constant of the Elgiloy spring. We transformed the constant into a ratio that could be applied directly onto any spring constant (we assume all of our springs have similar spring constant curve to the Elgiloy spring). 
+          </p>
+          <p>
+          Also, despite lowering the spring constant, the cube itself would be entirely at rest by the time it was heated enough for the formula to have an impact. As a result, we had to apply microforces to each particle (vibrations) in order for the structure to actually melt. Below are some of our simulations of the melting itself without colors for heat propagation.
+          </p>
+
+          <!-- GIF HERE!!!!!! -->
+          <div align="middle">
+            <table>
+              <tr>
+                <td>
+                  <img src="images/melter/melting.gif" align="middle" width="90%" />
+                  <figcaption align="middle">Constant heat applied from only bottom left point.</figcaption>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+
+
+          <div align="middle">
+            <table>
+              <tr>
+                <td>
+                  <img src="images/melter/rainbow.png" align="middle" width="90%" />
+                  <figcaption align="middle">Each plane colored by its relative temperature a bit after 1s.</figcaption>
+                </td>
+                <td>
+                  <img src="images/melter/melting_6.gif" align="middle" width="90%" />
+                  <figcaption align="middle">Constant heat applied from bottom plane of points.</figcaption>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+
+      <a class="anchor" id="results"></a>
+      <h2>Results</h2>
       <p>
       </p>
-    <div align="middle">
-      <table>
-        <tr>
-          <td>
-            <img src="images/part4/collision1.png" align="middle" width="100%" />
-            <figcaption align="middle">Falling cloth in initial stage of collisions.</figcaption>
-          </td>
-          <td>
-            <img src="images/part4/low_density1.png" align="middle" width="100%" />
-            <figcaption align="middle">Stage 1 with lower density.</figcaption>
-          </td>
-          <td>
-            <img src="images/part4/low_k1.png" align="middle" width="100%" />
-            <figcaption align="middle">Stage 1 with lower spring constant.</figcaption>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <img src="images/part4/collision2.png" align="middle" width="100%" />
-            <figcaption align="middle">Falling cloth in intermediate stage of collisions.</figcaption>
-          </td>
-          <td>
-            <img src="images/part4/low_density2.png" align="middle" width="100%" />
-            <figcaption align="middle">Stage 2 with lower density.</figcaption>
-          </td>
-          <td>
-            <img src="images/part4/low_k2.png" align="middle" width="100%" />
-            <figcaption align="middle">Stage 2 with lower spring constant.</figcaption>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <img src="images/part4/collision3.png" align="middle" width="100%" />
-            <figcaption align="middle">The cloth in its resting state on the plane.</figcaption>
-          </td>
-          <td>
-            <img src="images/part4/low_density3.png" align="middle" width="100%" />
-            <figcaption align="middle">Stage 3 with lower density.</figcaption>
-          </td>
-          <td>
-            <img src="images/part4/low_k3.png" align="middle" width="100%" />
-            <figcaption align="middle">Stage 3 with lower spring constant.</figcaption>
-          </td>
-        </tr>
-      </table>
-    </div>
+      <p>
+      </p>
+
+
+    <a class="anchor" id="contributions"></a>
+    <h2>Contributions</h2>
+    <h3>Mathew</h3>
+    <p>
+      Mathew worked on researching different methods of implementing heat propagation, specifically conduction and radiation. He also coded up the spring update algorithm, parts of the construction of the point mass cube itself, and contributed to the reports, video, and final presentation.
+    </p>
+    <h3>Michael</h3>
+    OMEGALUL pepega monkaW
+    <p>
+    </p>
     <p>
     </p>
 
-    <a class="anchor" id="part5"></a>
-    <h2>Part 5: Handling Self Collisions</h2>
-    <p>
-    </p>
-    <p>
-    <h4></h4>
-    <p>
-    </p>
-    <div align="middle">
-      <table>
-        <tr>
-          <td>
-            <img src="images/part5/phong_ambient.png" align="middle" width="100%" />
-            <figcaption align="middle">Ambient environment lighting.</figcaption>
-          </td>
-          <td>
-            <img src="images/part5/phong_diffuse.png" align="middle" width="100%" />
-            <figcaption align="middle">Diffuse lighting.</figcaption>
-          </td>
-          <td>
-            <img src="images/part5/phong_specular.png" align="middle" width="100%" />
-            <figcaption align="middle">Specular highlights.</figcaption>
-          </td>
-        </tr>
-      </table>
-    </div>
-    <div align="middle">
-      <img src="images/part5/phong.png" align="middle" width="50%" />
-      <figcaption align="middle">The end result.</figcaption>
-    </div>
-    <p>
-    </p>
-    <div align="middle">
-      <table>
-        <tr>
-          <td>
-            <img src="images/part5/custom_texture.png" align="middle" width="90%" />
-            <figcaption align="middle">Custom texture with texture mapping shader.</figcaption>
-          </td>
-          <td>
-            <img src="images/part5/custom_texture_fallen.png" align="middle" width="90%" />
-            <figcaption align="middle">The texture shader with the cloth draped onto the sphere.</figcaption>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <img src="images/part5/mirror.png" align="middle" width="90%" />
-            <figcaption align="middle">Mirror shading.</figcaption>
-          </td>
-          <td>
-            <img src="images/part5/mirror2.png" align="middle" width="90%" />
-            <figcaption align="middle">Mirror shading with the cloth draped.</figcaption>
-          </td>
-        </tr>
-      </table>
-    </div>
-    <p>
-    </p>
-    <div align="middle">
-      <table>
-        <tr>
-          <td>
-            <img src="images/part5/bump_default.png" align="middle" width="90%" />
-            <figcaption align="middle">Bump shader under default settings.</figcaption>
-          </td>
-          <td>
-            <img src="images/part5/bump_16.png" align="middle" width="90%" />
-            <figcaption align="middle">Bump shader using a low resolution 16x16 sphere mesh.</figcaption>
-          </td>
-          <td>
-            <img src="images/part5/bump_128.png" align="middle" width="90%" />
-            <figcaption align="middle">Bump shader using a higher resolution 128x128 sphere mesh.</figcaption>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <img src="images/part5/displacement_default.png" align="middle" width="90%" />
-            <figcaption align="middle">Displacement shader under default settings.</figcaption>
-          </td>
-          <td>
-            <img src="images/part5/displacement_16.png" align="middle" width="90%" />
-            <figcaption align="middle">Displacement shader using a low resolution 16x16 sphere mesh.</figcaption>
-          </td>
-          <td>
-            <img src="images/part5/displacement_128.png" align="middle" width="90%" />
-            <figcaption align="middle">Displacement shader using a higher resolution 128x128 sphere mesh.</figcaption>
-          </td>
-        </tr>
-      </table>
-    </div>
-    <p>
-    </p>
     <a class="anchor" id="conclusion"></a>
     <h2>Conclusion</h2>
     <p>
+    Something something i liked the class epic project learned lots love bobcao3 and john xiang dinosaur profile pic lol
     </p>
+    <a class="anchor" id="references"></a>
+    <h2>References</h2>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a class="nav-link" href="https://en.wikipedia.org/wiki/Heat_equation">https://en.wikipedia.org/wiki/Heat_equation</a></li>
+      <li class="nav-item"><a class="nav-link" href="https://www.osti.gov/biblio/1241122">https://www.osti.gov/biblio/1241122</a></li>
+      <li class="nav-item"><a class = "nav-link" href="https://en.wikipedia.org/wiki/Linear_elasticity">https://en.wikipedia.org/wiki/Linear_elasticity</a></li>
+      <li class="nav-item"><a class = "nav-link" href="https://engineersedge.com/heat_transfer/black_body_radiation.htm">https://engineersedge.com/heat_transfer/black_body_radiation.htm</a></li>
+      <li class="nav-item"><a class = "nav-link" href="https://docs.unity3d.com/Manual/class-SpringJoint.html">https://docs.unity3d.com/Manual/class-SpringJoint.html</a></li>
+      <li class="nav-item"><a class = "nav-link" href="https://docs.unity3d.com/Manual/class-Rigidbody.html">https://docs.unity3d.com/Manual/class-Rigidbody.html</a></li>
+    </ul>
     <br/><br/>
     </main>
   </div>
