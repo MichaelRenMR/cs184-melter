@@ -6,12 +6,17 @@
       font-weight: 300;
       font-family: 'Open Sans', sans-serif;
       color: #121212;
+      padding-bottom: 45px; 
+    }
+    blockquote {
+      font-style: italic; 
+      color: #595959
     }
     h1, h2, h3, h4 {
-      font-family: 'Source Sans Pro', sans-serif;
+      font-family: 'Open Sans', sans-serif;
     }
   </style>
-  <title>CS 184 Cloth Simulator</title>
+  <title>CS 184 Melter</title>
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <meta name="viewport" content=" width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/github-markdown-css/2.2.1/github-markdown.css">
@@ -20,24 +25,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="layout.css">
-  <style>
-      body {
-          padding-bottom: 50px;
-      }
-      p, li, blockquote {
-          font-family: 'Lora', serif;
-          font-size: 20px;
-      }
-      blockquote {
-          font-style: italic;
-          color: #595959;
-      }
-      h1, h2, h3, h4, h5, h6 {
-          font-family: 'Open Sans', sans-serif;
-          font-weight: bold;
-      }
-  </style>
-
 </head>
 
 
@@ -53,7 +40,6 @@
   <nav class="d-none d-xl-block col-lg-8 col-md-10 max-auto py-lg-5 position-fixed" style="padding-left:0">
   <div class="sidebar-sticky">
     <ul class="nav flex-column">
-      <li class="nav-item"><a class="nav-link" href="#">Title</a></li>
       <li class="nav-item"><a class="nav-link" href="#abstract">Abstract</a></li>
       <li class="nav-item"><a class = "nav-link" href="#technical_approach">Technical Approach</a></li>
       <li class="nav-item"><a class = "nav-link" href="#results">Results</a></li>
@@ -77,37 +63,63 @@
 
         <a class="anchor" id="technical_approach"></a>
         <h2>Technical Approach</h2>
-          <h3>Overall pipeline</h3>
+            <p>
+              For our simulator, we start off by setting up all of the appropriate point masses 
+              and constraints required. After that, we can begin running the simulation. At each timestep, 
+              the temperature of each point mass and the spring constant of each spring is updated to reflect
+              the propagation of heat throughout the lattice structure.
+            </p>
+          <h3>Pseudocode</h3>
+          The pseudocode below gives an overview of each step of the process:
+              <code style="display:block; white-space:pre-wrap">
+      void Start() {  // called once at the beginning of execution
+        buildStructure();  // initialize the point masses  
+        addStructuralSprings();
+        addShearingSprings();
+        assignTemps(); 
+      }
 
-          <div align="middle">
-            <table>
-              <tr>
-                <td>
-                  <img src="images/melter/pipeline.png" align="middle" width="90%" />
-                  <figcaption align="middle">Pseudocode of the overall melter pipeline.</figcaption>
-                </td>
-              </tr>
-            </table>
-          </div>
+      void Update() {  // called once per timestep 
+        updateTemps(); 
+        updateSprings(); 
+        vibrateSpheres(); 
+        updateColors(); 
+      }
+              </code>
+            <p>
+              In practice, construction of both types of springs was done together. Temperature assignments were 
+              also organized within the initial structure construction for the sake of brevity, although the process
+              outlined in the pseudocode would definitely work better for the sake of flexibility. The rest
+              of the code was organized as outlined above, although many of the loops in the 
+              <code>Update()</code> could be combined into one if desired.
+            </p>
 
-          <h3>Constructing the cube</h3>
+      <h3>Task 1: Constructing the Lattice Structure</h3>
+        <p>
+          The lattice was created by attaching a script to an empty <code>GameObject</code> that generated a 
+          3D array of sphere masses. Each of these sphere masses were given their own <code>Rigidbody</code> 
+          and connected to its (up to 26) neighbors using a one-way spring joint. Unlike Project 4 (ClothSim), 
+          we wanted to simulate a metal rather than a weightless cloth, so we used a high spring constant to 
+          make the cube appear solid and a higher mass per particle.
+        </p>
+
+        <div align="middle">
+          <table>
+            <tr>
+              <td>
+                <img src="images/melter/birdseye.png" align="middle" width="90%" />
+                <figcaption align="middle">Bird's eye view of the cube.</figcaption>
+              </td>
+            </tr>
+          </table>
+        </div>
+
           <p>
-          The cube was created by attaching a script to an empty <code>GameObject</code> that generated a 3D matrix of sphere masses. Each of these sphere masses were given their own <code>Rigidbody</code> and connected to its (up to 26) neighbors using a one-way spring joint. Unlike Project 4 (ClothSim), we wanted to simulate a metal rather than a weightless cloth, so we used a high spring constant to make the cube appear solid and a higher mass per particle.
-          </p>
-
-          <div align="middle">
-            <table>
-              <tr>
-                <td>
-                  <img src="images/melter/birdseye.png" align="middle" width="90%" />
-                  <figcaption align="middle">Bird's eye view of the cube.</figcaption>
-                </td>
-              </tr>
-            </table>
-          </div>
-
-          <p>
-          One of the biggest issues that we came across while implementing the structure was that the masses were too far apart from each other initially. If we applied too much external force, the box would explode and particles would fly everywhere on the screen. We fixed this by increasing the mass of each particle so that it would take more force to move a spring, as well as decreasing the average distance between each particle. 
+            One of the biggest issues that we came across while implementing the structure was that the 
+            masses were too far apart from each other initially. If we applied too much external force, 
+            the box would explode and particles would fly everywhere on the screen. We fixed this by 
+            increasing the mass of each particle so that it would take more force to move a spring, as 
+            well as decreasing the average distance between each particle. 
           </p>
 
           <div align="middle">
@@ -124,131 +136,231 @@
           </div>
 
           <p>
-          Some other more trivial issues that arose with our implementation came with how we designed the cube. Initially, we were only going to use structural spring joints, but the cube would simply fall apart. We later added in planar and 3D shearing to address this problem. In addition, Unity has only one way spring joints by default, so we had to apply spring joints for each point mass in one direction, unlike ClothSim where it was done in pairs. 
+            Some other more trivial issues that arose with our implementation came with how we designed 
+            the cube. Initially, we were only going to use structural spring joints, but the cube 
+            would simply fall apart. We later added in planar and 3D shearing to address this problem. 
+            In addition, Unity has only one way spring joints by default, so we had to apply spring 
+            joints for each point mass in one direction, unlike ClothSim where it was done in pairs. 
           </p>
 
-          <h3>Simulating heat propagation</h3>
+          <h3>Task 2: Simulating heat propagation</h3>
+          
+          <p>
+            With the construction of the cube done, the next step was to implement heat propagation. 
+            In order to do this, we made use of the proportionality given by the
+            <a href="https://en.wikipedia.org/wiki/Heat_equation">heat equation</a>: 
+            <b>the rate of temperature change at a point is directly proportional to the how much hotter 
+            or cooler the surrounding material at that point is.</b>
+          </p>
+          <p>
+            In the real heat equation, this proportionality is represented by the Laplacian. For our 
+            purposes, we attempted to approximate this temperature delta by computing a weighted average
+            of temperatures out of the point masses directly connected to any given point by springs. This
+            means that our weighted average was computed from (at most) 26 adjacent points masses. 
+          </p>
 
           <p>
+            With that in mind, we were still pleasantly surprised by the results: 
           </p>
 
-          <div align="middle">
-            <table>
-              <tr>
-                <td>
-                  <img src="images/melter/melting_3.gif" align="middle" width="90%" />
-                  <figcaption align="middle">Constant heat applied from the left.</figcaption>
-                </td>
-              </tr>
-            </table>
+          <div align="middle" style="margin-left: 5%; margin-right: 5%; overflow: hidden;">
+            <img src="images/melter/melting_3.gif" align="middle" width="90%"/>
+            <figcaption align="middle">Constant heat applied from the left.</figcaption>
           </div>
+          <br>
+          <p>
+            In the above example, constant heat was applied from the left side of the metal bar
+            throughout the span of the simulation. Notice how initially, the bar is all blue 
+            except for the the red block on the left, then the heat gradually spreads across the bar. 
+            We also used cubes as our primitive here rather than spherical point masses
+            for better visual results, as we had not implemented melting yet so the shape didn't matter.
+            To color the cubes, we created a lerp based on the temperature of the individual primitive, 
+            which was on a scale from 0-100, with 0 corresponding to blue (cold) and 100 correspoinding to 
+            red (hot). Initially our lerp was done in RGB values, but the visual results were not aesthetically
+            pleasing. As a result, we switched to the HSV spectrum seen above. 
+          </p>
+
+          <p>
+            For the next simulation, we attempted to benchmark it by comparing our results to 
+            the mathematically generated results from a YouTube video by 3Blue1Brown. The setup 
+            we employed was to have a fixed hot and cold point on the left and right respectively. 
+            For all the in between points we had the left half start hot, and the right half start cold, 
+            but we let them vary freely throughout the simulation. As far as we can tell, this is identical
+            to the setup employed by 3Blue1Brown and our results are very similar. Both simulations can 
+            be seen below for comparison:
+          </p>
 
           <div align="middle">
             <table>
               <tr>
                 <td>
                   <img src="images/melter/melting_4.gif" align="middle" width="90%" />
-                  <figcaption align="middle">Fixed hot and cold point on the left and right respectively.</figcaption>
+                  <figcaption align="middle">
+                    Fixed hot and cold point on the left and right respectively.
+                  </figcaption>
                 </td>
+              </tr>
+              <tr>
                 <td>
                   <img src="images/melter/3b1b.gif" align="middle" width="90%" />
                   <figcaption align="middle">3Blue1Brown: 
-                    <a href="https://www.youtube.com/watch?v=r6sGWTCMz2k">But what is a Fourier series? From heat flow to circle drawings | DE4
-</a>
-</figcaption>
+                    <a href="https://www.youtube.com/watch?v=r6sGWTCMz2k">
+                      But what is a Fourier series? From heat flow to circle drawings | DE4
+                    </a>
+                  </figcaption>
                 </td>
               </tr>
             </table>
           </div>
-
-
           <p>
-          One of the largest problems we encountered was how we wanted to simulate the heat propagation itself. Initially, we tried energy based radiation using the Stefan-Boltzmann Law, but we ran into issues with conservation of energy. As the simulation continued running, the temperatures would increase exponentially until they became <code>NaN</code>. Since we didn't want to go through the hassle of keeping track of the energy from heat loss and the energy from heat transfer, we went with the heat equation approach.
+            We ran our simulation for longer than 3Blue1Brown, which explains why we end up with 
+            a wider spectrum of colors.
           </p>
 
-          <h3>Applying melting</h3>
           <p>
-          To implement the melting effect, we used an empirically derived curve from <a href="https://www.osti.gov/biblio/1241122">Thermal Degradation of Extension Springs</a>. Since the paper didn't provide an explicit formula for their regression, we approximated it using a cubic spline. The formula would be applied to springs constants of the outgoing spring joints of each particle mass, causing hotter particles to have weaker springs over time. The cube itself would become less structurally stable because of the shift in spring forces, causing the melting effect that we wanted to simulate.
+            One of the largest problems we encountered was how we wanted to simulate the heat 
+            propagation itself. Initially, we tried energy based radiation using the Stefan-Boltzmann 
+            Law, but we ran into issues with conservation of energy. As the simulation continued running, 
+            the temperatures would increase exponentially until they became <code>NaN</code>. Since we 
+            didn't want to go through the hassle of keeping track of the energy from heat loss and the 
+            energy from heat transfer, we went with the heat equation approach.
+          </p>
+
+          <h3>Task 3: Applying melting</h3>
+          <p>
+            To implement the melting effect, we used an empirically derived curve from 
+            <a href="https://www.osti.gov/biblio/1241122">Thermal Degradation of Extension Springs</a>. 
+            Since the paper didn't provide an explicit formula for their regression, we approximated it 
+            using a cubic spline. The formula would be applied to springs constants of the outgoing 
+            spring joints of each particle mass, causing hotter particles to have weaker springs over 
+            time. The cube itself would become less structurally stable because of the shift in spring 
+            forces, causing the melting effect that we wanted to simulate.
           </p>
 
           <div align="middle">
-            <table>
-              <tr>
-                <td>
-                  <img src="images/melter/curve.png" align="middle" width="90%" />
-                  <figcaption align="middle">Werner, Brian T., Antoun, Bonnie R., and Sartor, George B. Thermal Degradation of Extension Springs.. United States: N. p., 2015. Web. 
-</figcaption>
-                </td>
-              </tr>
-            </table>
+            <img src="images/melter/curve.png" align="middle" width="70%" />
+            <figcaption align="middle">
+              Werner, Brian T., Antoun, Bonnie R., and Sartor, George B. 
+              Thermal Degradation of Extension Springs.. United States: N. p., 2015. 
+            </figcaption>
           </div>
-
+          <br>
           <p>
-          However, the formula only mapped temperature directly to the spring constant of the Elgiloy spring. We transformed the constant into a ratio that could be applied directly onto any spring constant (we assume all of our springs have similar spring constant curve to the Elgiloy spring). 
+            However, the formula only mapped temperature directly to the spring constant of the 
+            Elgiloy spring. We transformed the constant into a ratio that could be applied directly 
+            onto any spring constant (we assume all of our springs have similar spring constant curve 
+            to the Elgiloy spring). 
           </p>
           <p>
-          Also, despite lowering the spring constant, the cube itself would be entirely at rest by the time it was heated enough for the formula to have an impact. As a result, we had to apply microforces to each particle (vibrations) in order for the structure to actually melt. Below are some of our simulations of the melting itself without colors for heat propagation.
+            Also, despite lowering the spring constant, the cube itself would be entirely at rest by 
+            the time it was heated enough for the formula to have an impact. As a result, we had to 
+            apply microforces to each particle (vibrations) in order for the structure to actually melt. 
+            Below are some of our initial simulations of the melting.
+          </p>
+          <p>
+            In the first example, we apply constant heat to the entire bottom layer of point masses. The 
+            video below is sped up by five times:
+          </p>
+          <div align="middle" >
+           <video width="660" height="360" controls>
+              <source src="media/layeredited.mp4" type="video/mp4"/>
+           </video>
+          </div>
+          <p>
+            Note that although we get some very pretty results, there is some bouncing in the point masses
+            due to our spring model. This is even more apparent in the next example, in which we start 
+            by heating the center "core" of the lattice/metal. This video is also sped up by five times:
+          </p>
+          <div align="middle">
+           <video width="660" height="360" controls>
+            <source src="media/centeredited.mp4" type="video/mp4"/>
+         </video>
+          </div>
+          <p>
+            In the larger simulation, the lattice is being held together almost unnaturally in addition to 
+            the springiness. For our final deliverables, we resolved this by putting tighter restrictions 
+            on our spring scaling logic through clamping. 
           </p>
 
-          <!-- GIF HERE!!!!!! -->
-          <div align="middle">
-            <table>
-              <tr>
-                <td>
-                  <img src="images/melter/melting.gif" align="middle" width="90%" />
-                  <figcaption align="middle">Constant heat applied from only bottom left point.</figcaption>
-                </td>
-              </tr>
-            </table>
-          </div>
 
 
-
-          <div align="middle">
-            <table>
-              <tr>
-                <td>
-                  <img src="images/melter/rainbow.png" align="middle" width="90%" />
-                  <figcaption align="middle">Each plane colored by its relative temperature a bit after 1s.</figcaption>
-                </td>
-                <td>
-                  <img src="images/melter/melting_6.gif" align="middle" width="90%" />
-                  <figcaption align="middle">Constant heat applied from bottom plane of points.</figcaption>
-                </td>
-              </tr>
-            </table>
-          </div>
 
 
       <a class="anchor" id="results"></a>
       <h2>Results</h2>
       <p>
-      </p>
-      <p>
+        With all the changes made, let's see the results! 
       </p>
 
+      <h4>Constant heat applied to the bottom left corner: (2x speed)</h4>
+      <div align="middle" >
+        <video width="660" height="360" controls>
+           <source src="media/pointedited.mp4" type="video/mp4"/>
+        </video>
+      </div>
 
+      <h4>Constant heat applied to the middle section of the top layer: (real-time)</h4>
+      <div align="middle" >
+        <video width="660" height="360" controls>
+           <source src="media/final2edited.mp4" type="video/mp4"/>
+        </video>
+       </div>
+      <br>
+      <h4>
+        <a class="nav-link" href="https://www.youtube.com/watch?v=cqZxfsDY-CY">
+          Video - CS184 Final Project: Real-time Melting Simulator</a></li>
+      </h4>
+
+      
     <a class="anchor" id="contributions"></a>
     <h2>Contributions</h2>
     <h3>Mathew</h3>
     <p>
-      Mathew worked on researching different methods of implementing heat propagation, specifically conduction and radiation. He also coded up the spring update algorithm, parts of the construction of the point mass cube itself, and contributed to the reports, video, and final presentation.
+      I worked on researching different methods of implementing heat propagation, specifically 
+      conduction and radiation. I also coded up the spring update algorithm, parts of the 
+      construction of the point mass cube itself, and contributed to the reports, video, and 
+      final presentation.
     </p>
     <h3>Michael</h3>
-    OMEGALUL pepega monkaW
     <p>
+      I mainly worked on implementing the heat equation into our simulation model. I researched its 
+      logic and physical interpretation, and did a lot of testing to ensure its accuracy.
+      Additionally, I computed the spring scaling curve, and worked on optimizing the initial construction 
+      of our spring and point mass lattice I also contributed to parts of the reports, video, and 
+      final presentation. 
     </p>
-    <p>
-    </p>
+
+
 
     <a class="anchor" id="conclusion"></a>
     <h2>Conclusion</h2>
-    <p>
-    Something something i liked the class epic project learned lots love bobcao3 and john xiang dinosaur profile pic lol
-    </p>
+      <p>
+        In the end, we are very satisfied with the results of our project. In summary, we were able to 
+        implement the following in the past two weeks: 
+        <ul class="nav flex-column" style="list-style-type:square">
+          <li>Construct a metal lattice model</li>
+          <li>Implement, visualize, and test heat propagation through the lattice</li>
+          <li>Compute, implement, and refine spring scaling within the lattice</li>
+          <li>Create a (in our opinion) reasonably accurate real time melting simulator</li>
+        </ul>
+      </p>
+      <p>
+        Of course, there are still many improvements which can be made. Some of the things we weren't able to 
+        get to in these two weeks included adding more textures, improving the model, optimizing it, and 
+        implementing different types of materials. For the latter in particular, this may prove to be difficult
+        as the molecular structure of nonmetals is much more varying than that of metals. However, it is 
+        a worthy improvement to think about and pursue. 
+      </p>
+      <p>
+        Finally, as with all of the other projects done in this class, we had a lot of fun completing the final
+        project. We're very grateful to Ben, Cecilia, Vivien, and the entire rest of the course staff for 
+        making this one of the most rewarding and well organized courses we've ever taken. Thank you for 
+        everything!
+      </p>
+
     <a class="anchor" id="references"></a>
     <h2>References</h2>
-    <ul class="nav flex-column">
+    <ul class="nav flex-column" style="list-style-type:circle">
       <li class="nav-item"><a class="nav-link" href="https://en.wikipedia.org/wiki/Heat_equation">https://en.wikipedia.org/wiki/Heat_equation</a></li>
       <li class="nav-item"><a class="nav-link" href="https://www.osti.gov/biblio/1241122">https://www.osti.gov/biblio/1241122</a></li>
       <li class="nav-item"><a class = "nav-link" href="https://en.wikipedia.org/wiki/Linear_elasticity">https://en.wikipedia.org/wiki/Linear_elasticity</a></li>
@@ -256,7 +368,6 @@
       <li class="nav-item"><a class = "nav-link" href="https://docs.unity3d.com/Manual/class-SpringJoint.html">https://docs.unity3d.com/Manual/class-SpringJoint.html</a></li>
       <li class="nav-item"><a class = "nav-link" href="https://docs.unity3d.com/Manual/class-Rigidbody.html">https://docs.unity3d.com/Manual/class-Rigidbody.html</a></li>
     </ul>
-    <br/><br/>
     </main>
   </div>
 </div>

@@ -41,11 +41,11 @@ a.anchor {
 }
 
 .site-header {
-    background:#354C7B;
+    background:black;
 }
 
 .topbar {
-    color: #fff0f5;
+    color: lightgray;
 }
 
 .markdown-body table tr, .markdown-body table td {

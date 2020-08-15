@@ -114,7 +114,12 @@ public class Melter : MonoBehaviour
       }
 
       // Set initial fixed point and update color.
-      spheres[0,0,0].GetComponent<SphereTemp>().temp = 100f;
+      for (int i = 3; i < num_w - 3; i++) {
+        for (int k = 1; k < num_d - 1; k++) {
+          spheres[i, num_h - 1, k].GetComponent<SphereTemp>().temp = 100f;
+        }
+      }
+
       updateColors();
     }
 
@@ -197,9 +202,12 @@ public class Melter : MonoBehaviour
     		}
     	}
 
-      // Update fixed point.
-      spheres[0,0,0].GetComponent<SphereTemp>().temp = 100f;
-
+      // Update fixed point(s).
+      for (int i = 3; i < num_w - 3; i++) {
+        for (int k = 1; k < num_d - 1; k++) {
+          spheres[i, num_h - 1, k].GetComponent<SphereTemp>().temp = 100f;
+        }
+      }
     }
 
 
@@ -210,6 +218,7 @@ public class Melter : MonoBehaviour
     		float t1 = sj.gameObject.GetComponent<SphereTemp>().temp;
     		float t2 = sj.connectedBody.gameObject.GetComponent<SphereTemp>().temp;
     		float factor = getSpringFactor(t1, t2);
+        factor = Math.Max(0.001f, factor - 0.04f);
     		sj.spring = factor * SPRING_CONSTANT / springFactors[i];
     	}
     }
